@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Certificates — Signet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;475;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+      :root {
+        --primary: #181d26;
+        --primary-active: #0d1218;
+        --ink: #181d26;
+        --body: #333840;
+        --muted: #41454d;
+        --hairline: #dddddd;
+        --canvas: #ffffff;
+        --surface-soft: #f8fafc;
+        --cream: #faf6f1;
+        --forest: #0a2e0e;
+        --surface-dark: #181d26;
+        --on-primary: #ffffff;
+        --link: #1b61c9;
+        --info-border: #458fff;
+        --success: #006400;
+        --pricing-ink: #1d1f25;
+        --font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        --max: 1280px;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: var(--font);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.25;
+      }
+      a { color: var(--link); text-decoration: none; }
+      nav.top-nav {
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 48px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .brand, .btn-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: none;
+        border: 0;
+        color: var(--ink);
+        font: inherit;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 0;
+      }
+      .mark {
+        width: 22px;
+        height: 22px;
+        background: var(--ink);
+        border-radius: 4px;
+      }
+      .nav-side { display: flex; align-items: center; gap: 16px; }
+      .nav-side .btn-link { font-weight: 400; font-size: 14px; }
+      .who { color: var(--muted); }
+      .wrap {
+        width: min(var(--max), calc(100% - 96px));
+        margin: 0 auto;
+        padding: 96px 0;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 32px;
+        font-weight: 400;
+        line-height: 1.2;
+      }
+      .lede { margin: 0 0 32px; color: var(--body); max-width: 56ch; }
+      .view { display: none; }
+      .view.on { display: block; }
+      .list { display: grid; gap: 24px; }
+      .card {
+        border: 1px solid var(--hairline);
+        border-radius: 10px;
+        padding: 24px;
+        background: #ffffff;
+      }
+      .card-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 4px;
+      }
+      .card h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 400;
+      }
+      .tag {
+        flex: 0 0 auto;
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.2;
+        padding: 6px 10px;
+        border-radius: 6px;
+        white-space: nowrap;
+      }
+      .tag-expired {
+        background: #f54a4a;
+        color: #ffffff;
+      }
+      .tag-soon {
+        background: #e8eaed;
+        color: #181d26;
+      }
+      .tag-active {
+        background: #a8d8c4;
+        color: #0a2e0e;
+      }
+      .card.expired {
+        border-color: #f54a4a;
+      }
+      .serial {
+        font-family: ui-monospace, monospace;
+        color: var(--muted);
+        margin: 0 0 16px;
+      }
+      .dl {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 8px 16px;
+        margin: 0 0 24px;
+      }
+      .dl dt { color: var(--muted); margin: 0; }
+      .dl dd { margin: 0; }
+      .age {
+        background: var(--cream);
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      .age.expired-band { background: #f54a4a; color: #ffffff; }
+      .age.expired-band .ok { color: #ffffff; }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 1.4;
+        padding: 16px 24px;
+        border-radius: 12px;
+        border: 0;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .btn-primary { background: var(--primary); color: var(--on-primary); }
+      .btn-primary:active { background: var(--primary-active); }
+      .btn-primary:disabled { background: #9297a0; cursor: default; }
+      .btn-secondary {
+        background: var(--canvas);
+        color: var(--ink);
+        border: 1px solid var(--hairline);
+      }
+      .btn-pill {
+        border-radius: 9999px;
+        padding: 12px 24px;
+        border: 1px solid var(--hairline);
+        background: var(--canvas);
+        color: var(--pricing-ink);
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .btn-pill.on {
+        background: var(--primary);
+        color: var(--on-primary);
+        border-color: var(--primary);
+      }
+      .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+      .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+      .tier {
+        border: 1px solid var(--hairline);
+        border-radius: 10px;
+        padding: 32px;
+        background: var(--canvas);
+        cursor: pointer;
+        text-align: left;
+        width: 100%;
+        font: inherit;
+      }
+      .tier.featured { background: var(--surface-soft); border-color: transparent; }
+      .tier h3 { margin: 0; font-size: 20px; font-weight: 475; }
+      .price { font-size: 44.8px; font-weight: 475; margin: 16px 0; }
+      .dur { display: flex; gap: 8px; margin: 0 0 24px; }
+      .totals { width: 100%; border-collapse: collapse; }
+      .totals td {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .totals td:last-child { text-align: right; }
+      .cream {
+        background: var(--cream);
+        border-radius: 10px;
+        padding: 24px;
+      }
+      .sig {
+        border-radius: 12px;
+        padding: 48px;
+        color: var(--on-primary);
+        margin-bottom: 32px;
+      }
+      .forest { background: var(--forest); }
+      .dark { background: var(--surface-dark); }
+      #qrHost {
+        width: 256px;
+        height: 256px;
+        margin: 0 auto;
+        background: var(--canvas);
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid var(--hairline);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #qrHost img, #qrHost canvas { width: 100% !important; height: 100% !important; }
+      .pay-row {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        text-align: center;
+      }
+      .meta { color: var(--muted); margin: 8px 0; }
+      .ok { color: var(--success); font-weight: 500; }
+      .hist-table { width: 100%; border-collapse: collapse; }
+      .hist-table th, .hist-table td {
+        text-align: left;
+        padding: 12px 8px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .hist-table th { font-weight: 500; color: var(--muted); }
+      .hist-table .btn {
+        padding: 8px 12px;
+        font-size: 13px;
+        min-height: 0;
+      }
+      .empty { color: var(--muted); }
+      .toast {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 50;
+        display: none;
+        align-items: center;
+        gap: 10px;
+        min-width: 280px;
+        max-width: 420px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        background: #0a2e0e;
+        color: #fff;
+        box-shadow: 0 12px 32px rgba(24, 29, 38, 0.18);
+        font-weight: 500;
+      }
+      .toast.on { display: flex; }
+      .checkout {
+        display: grid;
+        grid-template-columns: 1.4fr 0.8fr;
+        gap: 24px;
+        align-items: start;
+      }
+      .checkout-main, .checkout-side {
+        background: #fff;
+        border: 1px solid var(--hairline);
+        border-radius: 16px;
+        padding: 28px;
+      }
+      .step-kicker {
+        margin: 0 0 8px;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        color: #1b7a5a;
+      }
+      .checkout-main h1 { font-size: 28px; font-weight: 500; }
+      .plans {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin: 24px 0 28px;
+      }
+      .plan {
+        border: 1px solid var(--hairline);
+        border-radius: 14px;
+        padding: 20px;
+        background: #fff;
+        text-align: left;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
+        width: 100%;
+      }
+      .plan.featured {
+        border: 2px solid #7db89a;
+        background: #f3faf7;
+      }
+      .plan-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .radio {
+        width: 18px;
+        height: 18px;
+        border: 2px solid #c5c9d0;
+        border-radius: 50%;
+        flex: 0 0 auto;
+        margin-top: 2px;
+      }
+      .plan.featured .radio {
+        border-color: #1b7a5a;
+        box-shadow: inset 0 0 0 4px #1b7a5a;
+      }
+      .plan h3 { margin: 0; font-size: 16px; font-weight: 500; }
+      .plan .hint { margin: 4px 0 16px; color: var(--muted); font-size: 13px; }
+      .plan .price { font-size: 32px; font-weight: 500; margin: 0 0 16px; }
+      .plan .price span { font-size: 14px; font-weight: 400; color: var(--muted); }
+      .badge-popular {
+        background: #e8eaed;
+        color: var(--ink);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        padding: 4px 8px;
+        border-radius: 999px;
+      }
+      .checks { margin: 0; padding: 0; list-style: none; color: var(--body); }
+      .checks li { padding: 4px 0 4px 22px; position: relative; }
+      .checks li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 9px;
+        width: 8px;
+        height: 4px;
+        border-left: 2px solid #1b7a5a;
+        border-bottom: 2px solid #1b7a5a;
+        transform: rotate(-45deg);
+      }
+      .dur-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .save-note { color: #1b7a5a; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; }
+      .dur-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .dur-card {
+        border: 1px solid var(--hairline);
+        border-radius: 12px;
+        padding: 16px 18px;
+        background: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        font: inherit;
+      }
+      .dur-card.on {
+        border: 2px solid #7db89a;
+        background: #f3faf7;
+      }
+      .dur-card strong { display: block; font-size: 16px; font-weight: 500; }
+      .dur-card span { color: var(--muted); font-size: 13px; }
+      .checkout-foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-top: 24px;
+        color: #1b7a5a;
+        font-size: 13px;
+      }
+      .os-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .os-head h2 { margin: 0; font-size: 20px; font-weight: 500; }
+      .draft {
+        background: #eef6f2;
+        color: #1b7a5a;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        padding: 4px 10px;
+        border-radius: 999px;
+      }
+      .os-pkg {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .os-pkg p { margin: 4px 0 0; color: var(--muted); }
+      .edit-link {
+        background: none;
+        border: 0;
+        color: #1b7a5a;
+        font: inherit;
+        cursor: pointer;
+        padding: 0;
+      }
+      .os-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        color: var(--body);
+      }
+      .os-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding: 16px 0 20px;
+        font-weight: 500;
+      }
+      .os-total strong { font-size: 28px; }
+      .os-total small { display: block; font-weight: 400; color: var(--muted); text-align: right; }
+      .btn-pay {
+        width: 100%;
+        background: #0e2a44;
+        color: #fff;
+        border-radius: 12px;
+      }
+      .qr-card .btn-pay,
+      .invoice-actions .btn-pay {
+        width: auto;
+        min-width: 240px;
+      }
+      .secure { text-align: center; color: var(--muted); font-size: 12px; margin: 12px 0 16px; }
+      .invoice-hint {
+        background: var(--surface-soft);
+        border: 1px solid var(--hairline);
+        border-radius: 12px;
+        padding: 14px 16px;
+        color: var(--body);
+        font-size: 13px;
+      }
+      .qr-card {
+        max-width: 640px;
+        margin: 0 auto;
+        background: #fff;
+        border: 1px solid var(--hairline);
+        border-radius: 16px;
+        padding: 36px 32px 40px;
+        text-align: center;
+      }
+      .qr-card .lede { margin-left: auto; margin-right: auto; }
+      .qr-stage {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 8px 0 20px;
+      }
+      .invoice-page {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .invoice-page .lede { max-width: none; }
+      .invoice-actions {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+      }
+      #invoiceBox {
+        display: flex;
+        justify-content: center;
+      }
+      #invoiceBox .receipt { margin: 0; width: 100%; }
+      .buyer-form { max-width: 720px; margin: 0 auto; }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .field { margin: 0; text-align: left; }
+      .field.full { grid-column: 1 / -1; }
+      .field label {
+        display: block;
+        margin: 0 0 8px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      #buyerForm .field label:has(+ input[required])::after,
+      #buyerForm .field label:has(+ textarea[required])::after,
+      #buyerForm .field label:has(+ select[required])::after {
+        content: " *";
+        color: #aa2d00;
+        font-weight: 500;
+      }
+      .field input, .field textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--hairline);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        font-family: inherit;
+        font-size: 14px;
+      }
+      .field textarea { min-height: 72px; resize: vertical; }
+      .field input:focus, .field textarea:focus {
+        outline: none;
+        border-color: #458fff;
+      }
+      .form-err {
+        color: #aa2d00;
+        font-size: 13px;
+        margin: 8px 0 0;
+        display: none;
+      }
+      .form-err.on { display: block; }
+      .buyer-summary {
+        margin: 0 0 24px;
+        padding: 16px 18px;
+        background: var(--surface-soft);
+        border-radius: 12px;
+        text-align: left;
+      }
+      @media (max-width: 960px) {
+        .form-grid { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 960px) {
+        .checkout, .plans, .dur-cards { grid-template-columns: 1fr; }
+      }
+      .receipt {
+        background: #fff;
+        color: var(--ink);
+        border: 1px solid var(--hairline);
+        border-radius: 8px;
+        padding: 32px 36px;
+        max-width: 760px;
+      }
+      .receipt-kicker {
+        margin: 0 0 16px;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .receipt-brand {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--ink);
+      }
+      .receipt-logo {
+        width: 48px;
+        height: 48px;
+        background: var(--ink);
+        border-radius: 6px;
+        flex: 0 0 auto;
+      }
+      .receipt-brand h2 {
+        margin: 0 0 4px;
+        font-size: 20px;
+        font-weight: 500;
+      }
+      .receipt-brand p { margin: 0 0 2px; color: var(--body); }
+      .receipt-title {
+        margin: 0 0 16px;
+        font-size: 22px;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+      }
+      .receipt h3 {
+        margin: 24px 0 10px;
+        font-size: 14px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .receipt-meta, .receipt-dl {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .receipt-meta td, .receipt-dl td {
+        padding: 6px 0;
+        vertical-align: top;
+      }
+      .receipt-meta td:first-child, .receipt-dl td:first-child {
+        width: 180px;
+        color: var(--muted);
+      }
+      .receipt-lines {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 8px 0 12px;
+      }
+      .receipt-lines th, .receipt-lines td {
+        text-align: left;
+        padding: 10px 8px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .receipt-lines th { font-weight: 500; color: var(--muted); font-size: 13px; }
+      .receipt-lines td:nth-child(3),
+      .receipt-lines th:nth-child(3),
+      .receipt-lines td:nth-child(4),
+      .receipt-lines th:nth-child(4),
+      .receipt-lines td:nth-child(5),
+      .receipt-lines th:nth-child(5) { text-align: right; }
+      .receipt-totals { width: 280px; margin-left: auto; border-collapse: collapse; }
+      .receipt-totals td { padding: 8px 0; }
+      .receipt-totals td:last-child { text-align: right; }
+      .receipt-totals tr:last-child td {
+        font-weight: 500;
+        border-top: 1px solid var(--ink);
+        padding-top: 12px;
+      }
+      .receipt-paid {
+        display: inline-block;
+        font-weight: 500;
+        color: var(--success);
+      }
+      .receipt-note {
+        margin: 24px 0 8px;
+        color: var(--body);
+      }
+      .receipt-sign { margin: 4px 0 0; color: var(--muted); }
+      .pricing-h1 {
+        font-size: 44.8px;
+        font-weight: 475;
+        line-height: 1.1;
+      }
+      .pricing-title {
+        font-size: 20px;
+        font-weight: 475;
+        line-height: 1.3;
+      }
+      .price .per {
+        font-size: 16px;
+        font-weight: 400;
+        color: var(--muted);
+      }
+      .plist {
+        margin: 0 0 24px;
+        padding: 0;
+        list-style: none;
+        color: var(--body);
+      }
+      .plist li {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--hairline);
+      }
+      @media (max-width: 800px) {
+        nav.top-nav { padding: 0 16px; }
+        .wrap { width: calc(100% - 32px); padding: 48px 0; }
+        .dl, .grid2, .pay-row { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="top-nav">
+      <button class="brand" type="button" id="goCerts">
+        <span class="mark" aria-hidden="true"></span>
+        CA - Prototype
+      </button>
+      <div class="nav-side">
+        <span class="who" id="who"></span>
+        <button class="btn-link" type="button" id="goCertificates">My certificates</button>
+        <button class="btn-link" type="button" id="goPricing">Pricing</button>
+        <button class="btn-link" type="button" id="goHistory">Payment history</button>
+        <button class="btn-link" type="button" id="logout">Log out</button>
+      </div>
+    </nav>
+    <main class="wrap">
+      <section class="view on" id="view-certs">
+        <h1>Your certificates</h1>
+        <p class="lede">
+          Mock certificates for this account. To extend validity, choose a certificate,
+          then a package. Payment uses a dynamic QR, then invoice and CA activation.
+        </p>
+        <div class="list" id="certList"></div>
+      </section>
+
+      <section class="view" id="view-pricing">
+        <h1 class="pricing-h1">Packages</h1>
+        <p class="lede">
+          Standard and Premium terms used when you extend a certificate’s validity.
+          Prices include a 10% tax at checkout.
+        </p>
+        <div class="grid2">
+          <article class="card">
+            <h2 class="pricing-title">Standard</h2>
+            <p class="meta">Core extension of validity age. Invoice export after payment.</p>
+            <div class="price">120.000<span class="per">KIP / year</span></div>
+            <ul class="plist">
+              <li>1 year · 120.000 KIP + tax (132.000 KIP total)</li>
+              <li>2 years · 200.000 KIP + tax (220.000 KIP total)</li>
+              <li>Dynamic QR checkout</li>
+              <li>CA entitlement update after payment</li>
+            </ul>
+            <button class="btn-pill" type="button" data-to-certs>Extend a certificate</button>
+          </article>
+          <article class="card soft">
+            <h2 class="pricing-title">Premium</h2>
+            <p class="meta">Priority CA fulfillment for the extension.</p>
+            <div class="price">240.000<span class="per">KIP / year</span></div>
+            <ul class="plist">
+              <li>1 year · 240.000 KIP + tax (264.000 KIP total)</li>
+              <li>2 years · 400.000 KIP + tax (440.000 KIP total)</li>
+              <li>Dynamic QR checkout</li>
+              <li>Priority activation on the existing CA</li>
+            </ul>
+            <button class="btn-pill on" type="button" data-to-certs>Extend a certificate</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="view-history">
+        <h1>Payment history</h1>
+        <p class="lede">Payments for this login, including mock past invoices and new extensions.</p>
+        <div id="historyBox"></div>
+        <div class="actions">
+          <button class="btn btn-secondary" type="button" id="histBack">Back to certificates</button>
+        </div>
+      </section>
+
+      <section class="view" id="view-package">
+        <div class="checkout">
+          <div class="checkout-main">
+            <p class="step-kicker">01 / CERTIFICATE PLAN</p>
+            <h1>Select your coverage</h1>
+            <p class="lede" id="pkgLede">You can change or renew your plan at any time.</p>
+            <div class="plans">
+              <button type="button" class="plan" data-pkg="Standard">
+                <div class="plan-top">
+                  <span class="radio"></span>
+                  <span></span>
+                </div>
+                <h3>Standard Certificate</h3>
+                <p class="hint">For personal sites and small teams</p>
+                <div class="price"><span id="pStd">120.00</span> <span>KIP / year</span></div>
+                <ul class="checks">
+                  <li>Domain validation</li>
+                  <li>256-bit encryption</li>
+                  <li>Email support</li>
+                </ul>
+              </button>
+              <button type="button" class="plan featured" data-pkg="Premium">
+                <div class="plan-top">
+                  <span class="radio"></span>
+                  <span class="badge-popular">MOST POPULAR</span>
+                </div>
+                <h3>Premium Certificate</h3>
+                <p class="hint">For growing businesses and teams</p>
+                <div class="price"><span id="pPre">240.00</span> <span>KIP / year</span></div>
+                <ul class="checks">
+                  <li>Organization validation</li>
+                  <li>Wildcard coverage</li>
+                  <li>Priority support</li>
+                </ul>
+              </button>
+            </div>
+            <div class="dur-head">
+              <div>
+                <strong>Subscription duration</strong>
+                <p class="meta" style="margin:4px 0 0">Longer coverage comes with better value.</p>
+              </div>
+            </div>
+            <div class="dur-cards">
+              <button type="button" class="dur-card on" data-years="1">
+                <strong>1 year</strong>
+                <span>Standard</span>
+              </button>
+              <button type="button" class="dur-card" data-years="2">
+                <strong>2 years</strong>
+                <span>Best value</span>
+              </button>
+            </div>
+            <div class="checkout-foot">
+              <span>Instant activation after payment confirmation</span>
+              <button class="edit-link" type="button" id="pkgBack">Cancel</button>
+            </div>
+          </div>
+          <aside class="checkout-side">
+            <div class="os-head">
+              <h2>Order summary</h2>
+              <span class="draft">DRAFT</span>
+            </div>
+            <div class="os-pkg">
+              <div>
+                <strong id="sumPkg">Premium Certificate</strong>
+                <p id="sumYrs">1-year subscription</p>
+                <p id="sumCn">—</p>
+              </div>
+              <button class="edit-link" type="button" id="osEdit">Edit</button>
+            </div>
+            <div class="os-row"><span>Certificate coverage</span><span id="osCover">12 months</span></div>
+            <div class="os-row"><span>Subtotal</span><span id="sumPrice">240.00 KIP</span></div>
+            <div class="os-row"><span>Tax (10%)</span><span id="sumTax">24.00 KIP</span></div>
+            <div class="os-total">
+              <span>Total due</span>
+              <div>
+                <strong id="sumTotal">264.00 KIP</strong>
+                <small>KIP, including tax</small>
+              </div>
+            </div>
+            <button class="btn btn-pay" type="button" id="createPay">Continue to billing →</button>
+            <p class="secure">Payments secured · dynamic QR checkout</p>
+            <p class="invoice-hint">An invoice will be generated automatically once your payment is confirmed.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="view-billing">
+        <div class="buyer-form qr-card" style="max-width:760px;text-align:left">
+          <p class="step-kicker">02 / CUSTOMER DETAILS</p>
+          <h1>Billing information</h1>
+          <p class="lede">Enter the payer details to print on the invoice, then continue to payment.</p>
+          <div class="buyer-summary">
+            <strong id="billPkg">Premium Certificate</strong>
+            <p class="meta" id="billMeta" style="margin:6px 0 0">1-year subscription · 264.00 KIP</p>
+          </div>
+          <form id="buyerForm">
+            <div class="form-grid">
+              <div class="field">
+                <label for="firstName">First name</label>
+                <input id="firstName" name="firstName" autocomplete="given-name" required />
+              </div>
+              <div class="field">
+                <label for="lastName">Last name</label>
+                <input id="lastName" name="lastName" autocomplete="family-name" required />
+              </div>
+              <div class="field full">
+                <label for="company">Company / organization</label>
+                <input id="company" name="company" autocomplete="organization" />
+              </div>
+              <div class="field">
+                <label for="buyerEmail">Email</label>
+                <input id="buyerEmail" name="email" type="email" autocomplete="email" required />
+              </div>
+              <div class="field">
+                <label for="phone">Phone</label>
+                <input id="phone" name="phone" type="tel" autocomplete="tel" required />
+              </div>
+              <div class="field full">
+                <label for="location">Address / location</label>
+                <textarea id="location" name="location" autocomplete="street-address" required></textarea>
+              </div>
+              <div class="field">
+                <label for="city">City</label>
+                <input id="city" name="city" autocomplete="address-level2" required />
+              </div>
+              <div class="field">
+                <label for="country">Country</label>
+                <input id="country" name="country" autocomplete="country-name" value="Lao PDR" required />
+              </div>
+            </div>
+            <p class="form-err" id="buyerErr">Please fill in all required fields.</p>
+            <div class="invoice-actions" style="margin-top:24px">
+              <button class="btn btn-secondary" type="button" id="billBack">Back to plan</button>
+              <button class="btn btn-pay" type="submit">Continue to payment →</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="view" id="view-qr">
+        <div class="qr-card">
+          <p class="step-kicker">03 / PAYMENT</p>
+          <h1>Scan the dynamic QR</h1>
+          <p class="lede">The code refreshes so it cannot be reused after expiry. Pay the amount shown, then wait for confirmation.</p>
+          <div class="pay-row">
+            <div class="qr-stage">
+              <div id="qrHost"></div>
+            </div>
+            <div>
+              <p class="meta">Payment reference <strong id="payRef"></strong></p>
+              <p class="meta">Amount <strong id="payAmt"></strong></p>
+              <p class="meta">QR refreshes in <strong id="ttl">15</strong>s</p>
+              <p class="ok" id="paidNote" hidden>Payment confirmed. Invoice is being generated.</p>
+              <p class="meta" id="qrPayload" hidden></p>
+              <div class="actions" style="justify-content:center">
+                <button class="btn btn-pay" type="button" id="simulatePay">Confirm payment success</button>
+              </div>
+            </div>
+          </div> 
+        </div>
+      </section>
+
+      <section class="view" id="view-invoice">
+        <div class="invoice-page">
+          <p class="step-kicker">04 / INVOICE</p>
+          <h1>Invoice generation and export</h1>
+          <p class="lede">Payment confirmation wrote this invoice automatically. Download it below. Certificate activation is handled on the backend.</p>
+          <div id="invoiceBox"></div>
+          <div class="invoice-actions">
+            <button class="btn btn-secondary" type="button" id="billBack">Back to certificates</button>
+            <button class="btn btn-secondary" type="button" id="dlHtml">Download invoice</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <div class="toast" id="toast" role="status"></div>
+    <script>
+      (function () {
+        var rates = { Standard: { 1: 120.000, 2: 200.000 }, Premium: { 1: 240.000, 2: 400.000 } };
+        var session = null;
+        try {
+          session = JSON.parse(sessionStorage.getItem("signet_session") || "null");
+        } catch (e) {
+          session = null;
+        }
+        if (!session || !session.token) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        document.getElementById("who").textContent = session.email;
+        document.getElementById("logout").addEventListener("click", function () {
+          sessionStorage.clear();
+          window.location.href = "login.html";
+        });
+
+        var MOCK_CERTS = [
+          {
+            id: "c1",
+            serial: "CA-4F21A9C0",
+            commonName: "vpn.north.example",
+            pkg: "Premium",
+            status: "Active",
+            issuer: "Existing CA via Signet",
+            keyUsage: "Digital signature, Key encipherment",
+            invoiceId: "INV-88421",
+            paymentRef: "PSP-7K2M9Q",
+            issuedAt: "2024-03-12T09:14:00.000Z",
+            validFrom: "2024-03-12T09:14:00.000Z",
+            baseYears: 2,
+            extraYears: 0,
+          },
+          {
+            id: "c2",
+            serial: "CA-18B3D044",
+            commonName: "mail.ops.example",
+            pkg: "Standard",
+            status: "Active",
+            issuer: "Existing CA via Signet",
+            keyUsage: "Digital signature",
+            invoiceId: "INV-77109",
+            paymentRef: "PSP-2H8R1C",
+            issuedAt: "2025-10-01T16:40:00.000Z",
+            validFrom: "2025-10-01T16:40:00.000Z",
+            baseYears: 1,
+            extraYears: 0,
+          },
+          {
+            id: "c3",
+            serial: "CA-9E70FF12",
+            commonName: "api.payments.example",
+            pkg: "Premium",
+            status: "Active",
+            issuer: "Existing CA via Signet",
+            keyUsage: "Digital signature, Key encipherment, TLS Web Server",
+            invoiceId: "INV-90331",
+            paymentRef: "PSP-4N6T0A",
+            issuedAt: "2025-11-02T11:05:00.000Z",
+            validFrom: "2025-11-02T11:05:00.000Z",
+            baseYears: 2,
+            extraYears: 0,
+          },
+          {
+            id: "c4",
+            serial: "CA-EXPIRE01",
+            commonName: "gateway.expired.example",
+            pkg: "Standard",
+            status: "Expired",
+            issuer: "Existing CA via Signet",
+            keyUsage: "Digital signature, Key encipherment",
+            invoiceId: "INV-55012",
+            paymentRef: "PSP-9Q1EXP",
+            issuedAt: "2024-06-01T08:00:00.000Z",
+            validFrom: "2024-06-01T08:00:00.000Z",
+            baseYears: 1,
+            extraYears: 0,
+          },
+        ];
+
+        var MOCK_HISTORY = [
+          {
+            invoiceId: "INV-88421",
+            orderId: "ORD-MOCK1",
+            pkg: "Premium",
+            years: 2,
+            total: 440,
+            paymentRef: "PSP-7K2M9Q",
+            paidAt: "2024-03-12T09:14:00.000Z",
+            email: "",
+            status: "activated",
+            certSerial: "CA-4F21A9C0",
+            commonName: "vpn.north.example",
+            kind: "issue",
+          },
+          {
+            invoiceId: "INV-77109",
+            orderId: "ORD-MOCK2",
+            pkg: "Standard",
+            years: 1,
+            total: 132,
+            paymentRef: "PSP-2H8R1C",
+            paidAt: "2025-01-08T16:40:00.000Z",
+            email: "",
+            status: "activated",
+            certSerial: "CA-18B3D044",
+            commonName: "mail.ops.example",
+            kind: "issue",
+          },
+          {
+            invoiceId: "INV-90331",
+            orderId: "ORD-MOCK3",
+            pkg: "Premium",
+            years: 1,
+            total: 264,
+            paymentRef: "PSP-4N6T0A",
+            paidAt: "2023-11-02T11:05:00.000Z",
+            email: "",
+            status: "activated",
+            certSerial: "CA-9E70FF12",
+            commonName: "api.payments.example",
+            kind: "issue",
+          },
+          {
+            invoiceId: "INV-55012",
+            orderId: "ORD-MOCK4",
+            pkg: "Standard",
+            years: 1,
+            total: 132,
+            paymentRef: "PSP-9Q1EXP",
+            paidAt: "2024-06-01T08:00:00.000Z",
+            email: "",
+            status: "activated",
+            certSerial: "CA-EXPIRE01",
+            commonName: "gateway.expired.example",
+            kind: "issue",
+          },
+        ];
+
+        function certKey() { return "signet_certs_v2_" + session.email.toLowerCase(); }
+        function histKey() { return "signet_paid_history"; }
+
+        function loadCerts() {
+          var raw = localStorage.getItem(certKey());
+          var rows;
+          if (!raw) {
+            rows = MOCK_CERTS.map(function (c) { return Object.assign({}, c); });
+            localStorage.setItem(certKey(), JSON.stringify(rows));
+            return rows;
+          }
+          try { rows = JSON.parse(raw); } catch (e) {
+            rows = MOCK_CERTS.map(function (c) { return Object.assign({}, c); });
+          }
+          if (!rows.some(function (c) { return c.id === "c4"; })) {
+            var expired = MOCK_CERTS.filter(function (c) { return c.id === "c4"; })[0];
+            rows.push(Object.assign({}, expired));
+            localStorage.setItem(certKey(), JSON.stringify(rows));
+          }
+          return rows;
+        }
+
+        function saveCerts(rows) {
+          localStorage.setItem(certKey(), JSON.stringify(rows));
+        }
+
+        function historyStore() {
+          try { return JSON.parse(localStorage.getItem(histKey()) || "{}"); }
+          catch (e) { return {}; }
+        }
+
+        function userHistory() {
+          var all = historyStore();
+          var key = session.email.toLowerCase();
+          if (!all[key]) {
+            all[key] = MOCK_HISTORY.map(function (h) {
+              return Object.assign({}, h, { email: session.email });
+            });
+            localStorage.setItem(histKey(), JSON.stringify(all));
+          } else if (!all[key].some(function (h) { return h.invoiceId === "INV-55012"; })) {
+            var expHist = MOCK_HISTORY.filter(function (h) { return h.invoiceId === "INV-55012"; })[0];
+            all[key].push(Object.assign({}, expHist, { email: session.email }));
+            localStorage.setItem(histKey(), JSON.stringify(all));
+          }
+          return all[key];
+        }
+
+        function writeHistory(rows) {
+          var all = historyStore();
+          all[session.email.toLowerCase()] = rows;
+          localStorage.setItem(histKey(), JSON.stringify(all));
+        }
+
+        var certs = loadCerts();
+        var flow = { certId: null, years: 1, pkg: "Premium", qrTimer: null, ttl: 15 };
+
+        function addYears(iso, years) {
+          var d = new Date(iso);
+          d.setFullYear(d.getFullYear() + Number(years));
+          return d.toISOString();
+        }
+        function fmt(iso) { return iso.replace("T", " ").slice(0, 19); }
+        function ageYears(c) { return Number(c.baseYears) + Number(c.extraYears || 0); }
+        function validTo(c) { return addYears(c.validFrom, ageYears(c)); }
+        function daysLeft(c) {
+          return Math.floor((new Date(validTo(c)).getTime() - Date.now()) / 86400000);
+        }
+        function isExpired(c) {
+          return daysLeft(c) < 0;
+        }
+        function isExpiringSoon(c) {
+          var d = daysLeft(c);
+          return d >= 0 && d <= 60;
+        }
+        function remaining(c) {
+          var days = daysLeft(c);
+          if (days < 0) return "This certificate expired " + Math.abs(days) + " days ago. Extend validity to restore it.";
+          var y = Math.floor(days / 365);
+          var d = days % 365;
+          if (isExpiringSoon(c)) return "Expires soon — " + days + " day(s) remaining.";
+          return y <= 0 ? d + " days remaining" : y + " year(s), " + d + " days remaining";
+        }
+        function statusTag(c) {
+          if (isExpired(c)) return { label: "Expired", cls: "tag-expired", status: "Expired" };
+          if (isExpiringSoon(c)) return { label: "Expires soon", cls: "tag-soon", status: "Active — expiring soon" };
+          return { label: "Active", cls: "tag-active", status: "Active" };
+        }
+        function money(n) { return n.toFixed(2); }
+        function toast(msg) {
+          var el = document.getElementById("toast");
+          el.textContent = msg;
+          el.classList.add("on");
+          clearTimeout(toast._t);
+          toast._t = setTimeout(function () { el.classList.remove("on"); }, 4000);
+        }
+        function totals() {
+          var price = rates[flow.pkg][flow.years];
+          var tax = price * 0.1;
+          return { price: price, tax: tax, total: price + tax };
+        }
+        function nonce() { return Math.random().toString(36).slice(2, 10); }
+        function currentCert() {
+          return certs.filter(function (c) { return c.id === flow.certId; })[0];
+        }
+
+        function show(id) {
+          document.querySelectorAll(".view").forEach(function (v) {
+            v.classList.toggle("on", v.id === id);
+          });
+          if (id === "view-certs") renderCerts();
+          if (id === "view-history") renderHistory();
+          if (id === "view-package") refreshSums();
+          if (id === "view-billing") fillBilling();
+          if (id === "view-qr") startQr();
+          if (id === "view-invoice") renderInvoice();
+        }
+
+        function renderCerts() {
+          document.getElementById("certList").innerHTML = certs
+            .map(function (c, i) {
+              var tag = statusTag(c);
+              var expired = isExpired(c);
+              var cardCls = "card" + (expired ? " expired" : "");
+              var ageCls = "age" + (expired ? " expired-band" : "");
+              var btn = expired
+                ? "<button class='btn btn-primary' type='button' data-extend='" + c.id +
+                  "'>Renew expired certificate</button>"
+                : "";
+              return (
+                "<article class='" + cardCls + "'><div class='card-head'><h2>" + c.commonName +
+                "</h2><span class='tag " + tag.cls + "'>" + tag.label + "</span></div>" +
+                "<p class='serial'>" + c.serial + "</p>" +
+                "<div class='" + ageCls + "'><p class='ok'>" + remaining(c) + "</p>" +
+                "<p>Validity age: <strong>" + ageYears(c) + " year(s)</strong> (issued " +
+                c.baseYears + ", extended +" + (c.extraYears || 0) + ")</p>" +
+                "<p>Valid " + fmt(c.validFrom) + " → " + fmt(validTo(c)) + "</p></div>" +
+                "<dl class='dl'>" +
+                "<dt>Subscriber</dt><dd>" + session.email + "</dd>" +
+                "<dt>Status</dt><dd>" + tag.status + "</dd>" +
+                "<dt>Package</dt><dd>" + c.pkg + "</dd>" +
+                "<dt>Issuer</dt><dd>" + c.issuer + "</dd>" +
+                "<dt>Key usage</dt><dd>" + c.keyUsage + "</dd>" +
+                "<dt>Issued</dt><dd>" + fmt(c.issuedAt) + "</dd>" +
+                "<dt>Invoice</dt><dd>" + c.invoiceId + "</dd>" +
+                "<dt>Payment reference</dt><dd>" + c.paymentRef + "</dd>" +
+                "</dl>" + btn + "</article>"
+              );
+            })
+            .join("");
+          document.querySelectorAll("[data-extend]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              flow.certId = btn.getAttribute("data-extend");
+              var c = currentCert();
+              document.getElementById("pkgLede").textContent =
+                "Renewing " + c.commonName + " (" + c.serial + "). You can change or renew your plan at any time.";
+              document.getElementById("sumCn").textContent = c.commonName;
+              show("view-package");
+            });
+          });
+        }
+
+        function fmtDate(iso) {
+          if (!iso) return "—";
+          var d = new Date(iso);
+          if (isNaN(d.getTime())) return "—";
+          var dd = String(d.getDate()).padStart(2, "0");
+          var mm = String(d.getMonth() + 1).padStart(2, "0");
+          return dd + "/" + mm + "/" + d.getFullYear();
+        }
+
+        function customerName() {
+          var local = (session.email || "customer").split("@")[0];
+          return local.replace(/[._-]+/g, " ").replace(/\b\w/g, function (c) {
+            return c.toUpperCase();
+          });
+        }
+
+        function buyerDisplayName(o) {
+          var n = [o && o.firstName, o && o.lastName].filter(Boolean).join(" ").trim();
+          if (n) return n;
+          if (o && o.company) return o.company;
+          return customerName();
+        }
+
+        function customerId() {
+          return "CUS-" + (session.email || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10);
+        }
+
+        function findCert(serial) {
+          return certs.filter(function (c) { return c.serial === serial; })[0] || null;
+        }
+
+        function invoiceFromHistory(r) {
+          var total = Number(r.total);
+          var price = r.price != null ? Number(r.price) : total / 1.1;
+          var tax = r.tax != null ? Number(r.tax) : total - price;
+          var cert = findCert(r.certSerial);
+          var prevExpiry = r.prevExpiry;
+          var newExpiry = r.newExpiry;
+          if (!prevExpiry && cert) {
+            prevExpiry = r.kind === "issue" ? cert.validFrom : validTo(cert);
+          }
+          if (!newExpiry && prevExpiry) newExpiry = addYears(prevExpiry, r.years);
+          return {
+            id: r.invoiceId,
+            paymentRef: r.paymentRef,
+            issuedAt: r.paidAt,
+            paymentMethod: r.paymentMethod || "Online Payment",
+            order: {
+              pkg: r.pkg,
+              years: r.years,
+              price: price,
+              tax: tax,
+              discount: Number(r.discount || 0),
+              total: total,
+              firstName: r.firstName || "",
+              lastName: r.lastName || "",
+              company: r.company || "",
+              location: r.location || "",
+              city: r.city || "",
+              country: r.country || "",
+              email: r.email || session.email,
+              phone: r.phone || "—",
+              commonName: r.commonName || (cert && cert.commonName) || "—",
+              serial: r.certSerial || "—",
+              certId: r.certId || (cert && cert.id) || r.certSerial || "—",
+              kind: r.kind,
+              prevExpiry: prevExpiry,
+              newExpiry: newExpiry,
+            },
+          };
+        }
+
+        function invoiceMarkup(inv) {
+          var o = inv.order;
+          var yearsLabel = o.years + (Number(o.years) === 1 ? " Year" : " Years");
+          var currency = "KIP";
+          var amt = function (n) { return money(Number(n)) + " " + currency; };
+          var desc = o.kind === "issue" ? "CA Certificate Issue" : "CA Validity Extension";
+          return (
+            "<article class='receipt'>" +
+            "<p class='receipt-kicker'>Invoice / Payment Receipt — CA Validity Extension</p>" +
+            "<div class='receipt-brand'><div class='receipt-logo' aria-hidden='true'></div><div>" +
+            "<h2>Signet</h2>" +
+            "<p>Certificate Authority Services</p>" +
+            "<p>Vientiane Capital, Lao PDR</p>" +
+            "<p>+856 21 000 000 | billing@signet.example | signet.example</p>" +
+            "</div></div>" +
+            "<h2 class='receipt-title'>PAYMENT INVOICE / RECEIPT</h2>" +
+            "<table class='receipt-meta'>" +
+            "<tr><td>Invoice No.</td><td>" + inv.id + "</td></tr>" +
+            "<tr><td>Invoice Date</td><td>" + fmtDate(inv.issuedAt) + "</td></tr>" +
+            "<tr><td>Payment Status</td><td><span class='receipt-paid'>PAID</span></td></tr>" +
+            "<tr><td>Payment Date</td><td>" + fmtDate(inv.issuedAt) + "</td></tr>" +
+            "</table>" +
+            "<h3>Bill To</h3>" +
+            "<table class='receipt-dl'>" +
+            "<tr><td>Customer Name</td><td>" + buyerDisplayName(o) + "</td></tr>" +
+            "<tr><td>Customer ID</td><td>" + customerId() + "</td></tr>" +
+            (o.company ? "<tr><td>Company</td><td>" + o.company + "</td></tr>" : "") +
+            "<tr><td>Email</td><td>" + (o.email || session.email) + "</td></tr>" +
+            "<tr><td>Phone</td><td>" + (o.phone || "—") + "</td></tr>" +
+            "<tr><td>Location</td><td>" + (o.location || "—") + "</td></tr>" +
+            "<tr><td>City</td><td>" + (o.city || "—") + "</td></tr>" +
+            "<tr><td>Country</td><td>" + (o.country || "—") + "</td></tr>" +
+            "</table>" +
+            "<h3>Service Details</h3>" +
+            "<table class='receipt-lines'><thead><tr>" +
+            "<th>Description</th><th>Validity Period</th><th>Quantity</th><th>Unit Price</th><th>Amount</th>" +
+            "</tr></thead><tbody><tr>" +
+            "<td>" + desc + " (" + o.pkg + ")</td><td>" + yearsLabel + "</td><td>1</td>" +
+            "<td>" + amt(o.price) + "</td><td>" + amt(o.price) + "</td>" +
+            "</tr></tbody></table>" +
+            "<table class='receipt-totals'>" +
+            "<tr><td>Subtotal</td><td>" + amt(o.price) + "</td></tr>" +
+            "<tr><td>Discount</td><td>" + amt(o.discount || 0) + "</td></tr>" +
+            "<tr><td>Tax</td><td>" + amt(o.tax) + "</td></tr>" +
+            "<tr><td>Total Paid</td><td>" + amt(o.total) + "</td></tr>" +
+            "</table>" +
+            "<h3>Certificate Details</h3>" +
+            "<table class='receipt-dl'>" +
+            "<tr><td>Certificate / CA Name</td><td>" + o.commonName + "</td></tr>" +
+            "<tr><td>Certificate ID</td><td>" + o.serial + "</td></tr>" +
+            "<tr><td>Previous Expiry Date</td><td>" + fmtDate(o.prevExpiry) + "</td></tr>" +
+            "<tr><td>New Expiry Date</td><td>" + fmtDate(o.newExpiry) + "</td></tr>" +
+            "<tr><td>Extension Period</td><td>" + yearsLabel + "</td></tr>" +
+            "</table>" +
+            "<h3>Payment Information</h3>" +
+            "<table class='receipt-dl'>" +
+            "<tr><td>Payment Method</td><td>" + (inv.paymentMethod || "Online Payment") + "</td></tr>" +
+            "<tr><td>Transaction ID</td><td>" + inv.paymentRef + "</td></tr>" +
+            "<tr><td>Payment Status</td><td><span class='receipt-paid'>Paid</span></td></tr>" +
+            "</table>" +
+            "<p class='receipt-note'>Thank you for your payment. Your CA validity has been successfully extended.</p>" +
+            "<p class='receipt-sign'>Issued by: Signet</p>" +
+            "<p class='receipt-sign'>Authorized by: Certificate Operations / Head of CA Services</p>" +
+            "</article>"
+          );
+        }
+
+        function downloadInvoiceHtml(inv) {
+          var styles = "";
+          document.querySelectorAll("style").forEach(function (tag) {
+            styles += tag.textContent;
+          });
+          var blob = new Blob(
+            ["<!DOCTYPE html><html><head><meta charset='UTF-8'><title>" + inv.id +
+              "</title><style>" + styles + " body{padding:32px;background:#fff}</style></head><body>" +
+              invoiceMarkup(inv) + "</body></html>"],
+            { type: "text/html" }
+          );
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = inv.id + ".html";
+          a.click();
+          URL.revokeObjectURL(a.href);
+        }
+
+        function renderHistory() {
+          var rows = userHistory();
+          var box = document.getElementById("historyBox");
+          if (!rows.length) {
+            box.innerHTML = "<p class='empty'>No paid orders yet.</p>";
+            return;
+          }
+          box.innerHTML =
+            "<table class='hist-table'><thead><tr><th>Paid</th><th>Type</th><th>Certificate</th><th>Invoice</th><th>Package</th><th>Total</th><th>PSP ref</th><th>Status</th><th></th></tr></thead><tbody>" +
+            rows.map(function (r) {
+              return "<tr><td>" + fmt(r.paidAt) + "</td><td>" + (r.kind === "extend" ? "Extension" : "Issue") +
+                "</td><td>" + (r.commonName || "—") + "</td><td>" + r.invoiceId + "</td><td>" +
+                r.pkg + " · " + r.years + " yr</td><td>" + Number(r.total).toFixed(2) + " KIP" +
+                "</td><td>" + r.paymentRef + "</td><td>" +
+                (r.certSerial ? "Activated · " + r.certSerial : r.status) +
+                "</td><td><button class='btn btn-secondary' type='button' data-dl-invoice='" +
+                r.invoiceId + "'>Download invoice</button></td></tr>";
+            }).join("") + "</tbody></table>";
+          box.querySelectorAll("[data-dl-invoice]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var id = btn.getAttribute("data-dl-invoice");
+              var row = rows.filter(function (r) { return r.invoiceId === id; })[0];
+              if (row) downloadInvoiceHtml(invoiceFromHistory(row));
+            });
+          });
+        }
+
+        function refreshSums() {
+          var t = totals();
+          document.getElementById("pStd").textContent = money(rates.Standard[flow.years]);
+          document.getElementById("pPre").textContent = money(rates.Premium[flow.years]);
+          document.getElementById("sumPkg").textContent = flow.pkg + " Certificate";
+          document.getElementById("sumYrs").textContent = flow.years + "-year subscription";
+          document.getElementById("osCover").textContent = (flow.years * 12) + " months";
+          document.getElementById("sumPrice").textContent = money(t.price) + " KIP";
+          document.getElementById("sumTax").textContent = money(t.tax) + " KIP";
+          document.getElementById("sumTotal").textContent = money(t.total) + " KIP";
+          document.querySelectorAll(".plan").forEach(function (el) {
+            el.classList.toggle("featured", el.getAttribute("data-pkg") === flow.pkg);
+          });
+          document.querySelectorAll(".dur-card").forEach(function (el) {
+            el.classList.toggle("on", Number(el.getAttribute("data-years")) === flow.years);
+          });
+        }
+
+        document.querySelectorAll("[data-years]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            flow.years = Number(b.getAttribute("data-years"));
+            refreshSums();
+          });
+        });
+        document.querySelectorAll("[data-pkg]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            flow.pkg = b.getAttribute("data-pkg");
+            refreshSums();
+          });
+        });
+        document.getElementById("osEdit").addEventListener("click", function () {
+          document.querySelector(".plans").scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+
+        function fillBilling() {
+          var t = totals();
+          var c = currentCert();
+          document.getElementById("billPkg").textContent = flow.pkg + " Certificate";
+          document.getElementById("billMeta").textContent =
+            flow.years + "-year subscription · " + money(t.total) + " KIP" +
+            (c ? " · " + c.commonName : "");
+          if (!document.getElementById("buyerEmail").value) {
+            document.getElementById("buyerEmail").value = session.email || "";
+          }
+          var b = flow.buyer;
+          if (b) {
+            document.getElementById("firstName").value = b.firstName || "";
+            document.getElementById("lastName").value = b.lastName || "";
+            document.getElementById("company").value = b.company || "";
+            document.getElementById("buyerEmail").value = b.email || session.email || "";
+            document.getElementById("phone").value = b.phone || "";
+            document.getElementById("location").value = b.location || "";
+            document.getElementById("city").value = b.city || "";
+            document.getElementById("country").value = b.country || "Lao PDR";
+          }
+        }
+
+        function readBuyer() {
+          return {
+            firstName: document.getElementById("firstName").value.trim(),
+            lastName: document.getElementById("lastName").value.trim(),
+            company: document.getElementById("company").value.trim(),
+            email: document.getElementById("buyerEmail").value.trim(),
+            phone: document.getElementById("phone").value.trim(),
+            location: document.getElementById("location").value.trim(),
+            city: document.getElementById("city").value.trim(),
+            country: document.getElementById("country").value.trim(),
+          }; 
+        }
+
+        document.getElementById("createPay").addEventListener("click", function () {
+          if (!currentCert()) return;
+          show("view-billing");
+        });
+
+        document.getElementById("buyerForm").addEventListener("submit", function (e) {
+          e.preventDefault();
+          var buyer = readBuyer();
+          var err = document.getElementById("buyerErr");
+          if (!buyer.firstName || !buyer.lastName || !buyer.email || !buyer.phone || !buyer.location || !buyer.city || !buyer.country) {
+            err.classList.add("on");
+            return;
+          }
+          err.classList.remove("on");
+          flow.buyer = buyer;
+          var t = totals();
+          var c = currentCert();
+          var prevExpiry = validTo(c);
+          sessionStorage.setItem("signet_order", JSON.stringify({
+            id: "ORD-" + Date.now().toString(36).toUpperCase(),
+            pkg: flow.pkg,
+            years: flow.years,
+            price: t.price,
+            tax: t.tax,
+            discount: 0,
+            total: t.total,
+            email: buyer.email,
+            phone: buyer.phone,
+            firstName: buyer.firstName,
+            lastName: buyer.lastName,
+            company: buyer.company,
+            location: buyer.location,
+            city: buyer.city,
+            country: buyer.country,
+            certId: c.id,
+            commonName: c.commonName,
+            serial: c.serial,
+            kind: "extend",
+            prevExpiry: prevExpiry,
+            newExpiry: addYears(prevExpiry, flow.years),
+          }));
+          sessionStorage.setItem("signet_payment", JSON.stringify({
+            ref: "PSP-" + Math.random().toString(36).slice(2, 8).toUpperCase(),
+            status: "pending",
+            nonce: nonce(),
+          }));
+          sessionStorage.removeItem("signet_invoice");
+          sessionStorage.removeItem("signet_fulfill");
+          show("view-qr");
+        });
+
+        function payload() {
+          var order = JSON.parse(sessionStorage.getItem("signet_order"));
+          var pay = JSON.parse(sessionStorage.getItem("signet_payment"));
+          return JSON.stringify({
+            v: 1,
+            type: "signet.dynamic-qr",
+            kind: "extend",
+            ref: pay.ref,
+            order: order.id,
+            cert: order.serial,
+            amount: order.total.toFixed(2),
+            currency: "KIP",
+            nonce: pay.nonce,
+            exp: Date.now() + 15000,
+          });
+        }
+
+        function drawQr() {
+          var host = document.getElementById("qrHost");
+          host.innerHTML = "";
+          var text = payload();
+          document.getElementById("qrPayload").textContent = text;
+          var pay = JSON.parse(sessionStorage.getItem("signet_payment"));
+          var order = JSON.parse(sessionStorage.getItem("signet_order"));
+          document.getElementById("payRef").textContent = pay.ref;
+          document.getElementById("payAmt").textContent = order.total.toFixed(2) + " KIP";
+          new QRCode(host, { text: text, width: 232, height: 232, correctLevel: QRCode.CorrectLevel.M });
+        }
+
+        function startQr() {
+          var pay = JSON.parse(sessionStorage.getItem("signet_payment") || "null");
+          document.getElementById("paidNote").hidden = !(pay && pay.status === "paid");
+          document.getElementById("simulatePay").disabled = !!(pay && pay.status === "paid");
+          if (flow.qrTimer) clearInterval(flow.qrTimer);
+          flow.ttl = 15;
+          document.getElementById("ttl").textContent = flow.ttl;
+          drawQr();
+          flow.qrTimer = setInterval(function () {
+            var current = JSON.parse(sessionStorage.getItem("signet_payment") || "null");
+            if (!current || current.status === "paid") {
+              clearInterval(flow.qrTimer);
+              return;
+            }
+            flow.ttl -= 1;
+            if (flow.ttl <= 0) {
+              current.nonce = nonce();
+              sessionStorage.setItem("signet_payment", JSON.stringify(current));
+              flow.ttl = 15;
+              drawQr();
+            }
+            document.getElementById("ttl").textContent = flow.ttl;
+          }, 1000);
+        }
+
+        document.getElementById("simulatePay").addEventListener("click", function () {
+          var pay = JSON.parse(sessionStorage.getItem("signet_payment"));
+          var order = JSON.parse(sessionStorage.getItem("signet_order"));
+          pay.status = "paid";
+          pay.paidAt = new Date().toISOString();
+          sessionStorage.setItem("signet_payment", JSON.stringify(pay));
+          var inv = {
+            id: "INV-" + order.id.slice(4),
+            order: order,
+            paymentRef: pay.ref,
+            issuedAt: pay.paidAt,
+            paymentMethod: "Online Payment",
+          };
+          sessionStorage.setItem("signet_invoice", JSON.stringify(inv));
+          var rows = userHistory();
+          rows.unshift({
+            invoiceId: inv.id,
+            orderId: order.id,
+            pkg: order.pkg,
+            years: order.years,
+            price: order.price,
+            tax: order.tax,
+            discount: order.discount || 0,
+            total: order.total,
+            paymentRef: pay.ref,
+            paymentMethod: "Online Payment",
+            paidAt: pay.paidAt,
+            email: order.email || session.email,
+            phone: order.phone,
+            firstName: order.firstName,
+            lastName: order.lastName,
+            company: order.company,
+            location: order.location,
+            city: order.city,
+            country: order.country,
+            prevExpiry: order.prevExpiry,
+            newExpiry: order.newExpiry,
+            status: "activated",
+            certSerial: order.serial,
+            commonName: order.commonName,
+            kind: "extend",
+          });
+          writeHistory(rows);
+          certs = certs.map(function (c) {
+            if (c.id === order.certId) {
+              c.extraYears = Number(c.extraYears || 0) + Number(order.years);
+              c.pkg = order.pkg;
+              c.invoiceId = inv.id;
+              c.paymentRef = pay.ref;
+            }
+            return c;
+          });
+          saveCerts(certs);
+          document.getElementById("paidNote").hidden = false;
+          document.getElementById("simulatePay").disabled = true;
+          if (flow.qrTimer) clearInterval(flow.qrTimer);
+          toast("Payment successful. Your invoice is ready.");
+          setTimeout(function () { show("view-invoice"); }, 900);
+        });
+
+        function renderInvoice() {
+          var inv = JSON.parse(sessionStorage.getItem("signet_invoice"));
+          document.getElementById("invoiceBox").innerHTML = invoiceMarkup(inv);
+        }
+
+        document.getElementById("dlHtml").addEventListener("click", function () {
+          downloadInvoiceHtml(JSON.parse(sessionStorage.getItem("signet_invoice")));
+        });
+
+        document.getElementById("goCerts").addEventListener("click", function () { show("view-certs"); });
+        document.getElementById("goCertificates").addEventListener("click", function () { show("view-certs"); });
+        document.getElementById("goPricing").addEventListener("click", function () { show("view-pricing"); });
+        document.getElementById("goHistory").addEventListener("click", function () { show("view-history"); });
+        document.querySelectorAll("[data-to-certs]").forEach(function (b) {
+          b.addEventListener("click", function () { show("view-certs"); });
+        });
+        document.getElementById("histBack").addEventListener("click", function () { show("view-certs"); });
+        document.getElementById("pkgBack").addEventListener("click", function () { show("view-certs"); });
+        document.getElementById("billBack").addEventListener("click", function () { show("view-package"); });
+
+        show("view-certs");
+      })();
+    </script>
+  </body>
+</html>
