@@ -1004,8 +1004,8 @@
             keyUsage: "Digital signature, Key encipherment",
             invoiceId: "INV-55012",
             paymentRef: "PSP-9Q1EXP",
-            issuedAt: "2024-06-01T08:00:00.000Z",
-            validFrom: "2024-06-01T08:00:00.000Z",
+            issuedAt: "2025-03-01T08:00:00.000Z",
+            validFrom: "2025-03-01T08:00:00.000Z",
             baseYears: 1,
             extraYears: 0,
           },
@@ -1019,7 +1019,7 @@
             years: 1,
             total: 132,
             paymentRef: "PSP-9Q1EXP",
-            paidAt: "2024-06-01T08:00:00.000Z",
+            paidAt: "2025-03-01T08:00:00.000Z",
             email: "",
             status: "activated",
             certSerial: "CA-EXPIRE01",
@@ -1028,7 +1028,7 @@
           },
         ];
 
-        function certKey() { return "signet_certs_v3_" + session.email.toLowerCase(); }
+        function certKey() { return "signet_certs_v4_" + session.email.toLowerCase(); }
         function histKey() { return "signet_paid_history_v2"; }
 
         function defaultCerts() {
@@ -1075,12 +1075,25 @@
           return rows;
         }
 
+        function clearCheckoutSession() {
+          sessionStorage.removeItem("signet_payment");
+          sessionStorage.removeItem("signet_order");
+          sessionStorage.removeItem("signet_invoice");
+        }
+
+        function syncQrPaymentUi(pay) {
+          var paid = !!(pay && pay.status === "paid");
+          document.getElementById("paidNote").hidden = !paid;
+          document.getElementById("simulatePay").disabled = paid;
+        }
+
         function resetToDefault() {
           if (flow.qrTimer) clearInterval(flow.qrTimer);
+          clearCheckoutSession();
+          syncQrPaymentUi(null);
           certs = defaultCerts();
           saveCerts(certs);
           writeHistory(defaultHistory());
-          sessionStorage.removeItem("signet_invoice");
           flow.certId = null;
           flow.years = 1;
           flow.pkg = "Premium";
@@ -1195,6 +1208,8 @@
           document.querySelectorAll("[data-extend]").forEach(function (btn) {
             btn.addEventListener("click", function () {
               flow.certId = btn.getAttribute("data-extend");
+              clearCheckoutSession();
+              syncQrPaymentUi(null);
               var c = currentCert();
               document.getElementById("pkgLede").textContent =
                 "Renewing " + c.commonName + " (" + c.serial + "). You can change or renew your plan at any time.";
@@ -1499,13 +1514,15 @@
             prevExpiry: prevExpiry,
             newExpiry: addYears(prevExpiry, flow.years),
           }));
-          sessionStorage.setItem("signet_payment", JSON.stringify({
+          var pay = {
             ref: "PSP-" + Math.random().toString(36).slice(2, 8).toUpperCase(),
             status: "pending",
             nonce: nonce(),
-          }));
+          };
+          sessionStorage.setItem("signet_payment", JSON.stringify(pay));
           sessionStorage.removeItem("signet_invoice");
           sessionStorage.removeItem("signet_fulfill");
+          syncQrPaymentUi(pay);
           show("view-qr");
         });
 
@@ -1539,9 +1556,13 @@
         }
 
         function startQr() {
-          var pay = JSON.parse(sessionStorage.getItem("signet_payment") || "null");
-          document.getElementById("paidNote").hidden = !(pay && pay.status === "paid");
-          document.getElementById("simulatePay").disabled = !!(pay && pay.status === "paid");
+          var pay = null;
+          try {
+            pay = JSON.parse(sessionStorage.getItem("signet_payment") || "null");
+          } catch (e) {
+            pay = null;
+          }
+          syncQrPaymentUi(pay);
           if (flow.qrTimer) clearInterval(flow.qrTimer);
           flow.ttl = 15;
           document.getElementById("ttl").textContent = flow.ttl;
@@ -1564,8 +1585,15 @@
         }
 
         document.getElementById("simulatePay").addEventListener("click", function () {
-          var pay = JSON.parse(sessionStorage.getItem("signet_payment"));
-          var order = JSON.parse(sessionStorage.getItem("signet_order"));
+          var pay = null;
+          var order = null;
+          try {
+            pay = JSON.parse(sessionStorage.getItem("signet_payment"));
+            order = JSON.parse(sessionStorage.getItem("signet_order"));
+          } catch (e) {
+            return;
+          }
+          if (!pay || !order || pay.status === "paid") return;
           pay.status = "paid";
           pay.paidAt = new Date().toISOString();
           sessionStorage.setItem("signet_payment", JSON.stringify(pay));
@@ -1616,8 +1644,7 @@
             return c;
           });
           saveCerts(certs);
-          document.getElementById("paidNote").hidden = false;
-          document.getElementById("simulatePay").disabled = true;
+          syncQrPaymentUi(pay);
           if (flow.qrTimer) clearInterval(flow.qrTimer);
           toast("Payment successful. Certificate and payment history updated.");
           setTimeout(function () { show("view-invoice"); }, 900);
