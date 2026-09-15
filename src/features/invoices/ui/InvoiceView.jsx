@@ -1,6 +1,19 @@
-import { downloadInvoiceHtml, invoiceMarkup } from "../model/invoice.js";
+import { useEffect, useState } from "react";
+import { downloadInvoiceHtml, invoiceMarkup, receiptQrSrc } from "../model/invoice.js";
 
 export default function InvoiceView({ invoice, email, onBack }) {
+  const [html, setHtml] = useState(() => invoiceMarkup(invoice, email, ""));
+
+  useEffect(() => {
+    let cancelled = false;
+    receiptQrSrc(invoice).then((qrSrc) => {
+      if (!cancelled) setHtml(invoiceMarkup(invoice, email, qrSrc));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [invoice, email]);
+
   return (
     <section className="view on">
       <div className="invoice-page">
@@ -10,7 +23,7 @@ export default function InvoiceView({ invoice, email, onBack }) {
           Payment confirmation wrote this invoice automatically. Download it below. Certificate activation is handled on
           the backend.
         </p>
-        <div id="invoiceBox" dangerouslySetInnerHTML={{ __html: invoiceMarkup(invoice, email) }} />
+        <div id="invoiceBox" dangerouslySetInnerHTML={{ __html: html }} />
         <div className="actions">
           <button className="btn btn-secondary" type="button" onClick={onBack}>
             Back to certificates

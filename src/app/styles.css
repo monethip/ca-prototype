@@ -1709,9 +1709,10 @@
       .receipt h3 {
         margin: 24px 0 10px;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.04em;
+        color: var(--ink);
       }
       .receipt-meta, .receipt-dl {
         width: 100%;
@@ -1743,6 +1744,10 @@
       .receipt-lines td:nth-child(5),
       .receipt-lines th:nth-child(5) { text-align: right; }
       .receipt-totals { width: 280px; margin-left: auto; border-collapse: collapse; }
+      .receipt-totals td:first-child,
+      .receipt-total-paid span {
+        color: var(--muted);
+      }
       .receipt-totals td { padding: 8px 0; }
       .receipt-totals td:last-child { text-align: right; }
       .receipt-totals tr:last-child td {
@@ -1760,6 +1765,50 @@
         color: var(--body);
       }
       .receipt-sign { margin: 4px 0 0; color: var(--muted); }
+      .receipt-check {
+        display: grid;
+        grid-template-columns: 1fr 200px;
+        gap: 28px;
+        align-items: start;
+        margin-top: 8px;
+      }
+      .receipt-total-paid {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        margin: 0 0 12px;
+        font-size: 14px;
+      }
+      .receipt-total-paid strong { font-weight: 500; }
+      .receipt-qr {
+        background: #f5e27a;
+        padding: 14px 12px 16px;
+        text-align: center;
+      }
+      .receipt-qr-name {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--ink);
+      }
+      .receipt-qr img {
+        display: block;
+        width: 132px;
+        height: 132px;
+        margin: 10px auto 0;
+        background: #fff;
+        padding: 4px;
+      }
+      .receipt-qr-caption {
+        margin: 10px 0 0;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      @media (max-width: 767px) {
+        .receipt-check { grid-template-columns: 1fr; }
+        .receipt-qr { max-width: 200px; }
+      }
       .pricing-h1 {
         font-size: 44.8px;
         font-weight: 475;
