@@ -951,6 +951,72 @@
       .soft-field select:focus { outline: none; border: 0; }
       .file-field input[type="file"] { font-size: 13px; padding: 6px 0; }
       .file-field em { font-style: normal; color: var(--muted); font-size: 12px; }
+      .field .file-drop-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        padding: 28px 20px;
+        border: 1.5px dashed var(--hairline);
+        border-radius: 16px;
+        background: #fafbfc;
+        text-align: center;
+        cursor: pointer;
+        outline: none;
+        font-weight: 400;
+      }
+      .field .file-drop-card:hover,
+      .field .file-drop-card.dragging,
+      .field .file-drop-card:focus-within {
+        border-color: var(--info-border);
+        background: #f5f8fd;
+      }
+      .field .file-drop-card-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        border: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .file-drop-card-icon {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        margin-bottom: 4px;
+        border-radius: 50%;
+        background: #eceef1;
+        color: var(--muted);
+      }
+      .file-drop-card strong {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .file-drop-card p {
+        margin: 0 0 6px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 400;
+      }
+      .file-drop-card-browse {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 0;
+        height: 36px;
+        padding: 0 14px;
+        border: 1px solid var(--hairline);
+        border-radius: var(--r-sm);
+        background: #fff;
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 500;
+      }
       .dev-remark {
         box-sizing: border-box;
         width: 100%;
@@ -1571,11 +1637,13 @@
         gap: 12px;
         margin-top: 24px;
       }
-      #invoiceBox {
+      .invoice-preview {
         display: flex;
         justify-content: center;
+        width: 100%;
+        overflow-x: auto;
       }
-      #invoiceBox .receipt { margin: 0; width: 100%; }
+      .invoice-preview .receipt { margin: 0 auto; width: 100%; }
       .buyer-form { max-width: 720px; margin: 0 auto; }
       .billing-title-row {
         display: flex;
@@ -1630,6 +1698,13 @@
         outline: none;
         border-color: #458fff;
       }
+      .about-form.has-errors .field > input:invalid,
+      .about-form.has-errors .field > select:invalid,
+      .about-form .field[data-invalid="true"] > input,
+      .about-form .field[data-invalid="true"] > select,
+      .about-form .field[data-invalid="true"] .file-drop-card {
+        border-color: #aa2d00;
+      }
       .enroll-section {
         margin: 28px 0 16px;
         font-size: 16px;
@@ -1663,151 +1738,139 @@
         .plan-board-body { grid-template-columns: 1fr; }
         .plan-divider { width: 100%; height: 1px; }
       }
-      .receipt {
+      .receipt.lc-invoice {
         background: #fff;
-        color: var(--ink);
-        border: 1px solid var(--hairline);
-        border-radius: 8px;
-        padding: 32px 36px;
+        color: #111;
+        border: 1px solid #ddd;
+        border-radius: 0;
+        padding: 28px 32px 40px;
         max-width: 760px;
+        font-family: Arial, Helvetica, sans-serif;
       }
-      .receipt-kicker {
-        margin: 0 0 16px;
-        font-size: 13px;
-        font-weight: 500;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: var(--muted);
-      }
-      .receipt-brand {
-        display: flex;
-        gap: 16px;
-        align-items: flex-start;
-        margin-bottom: 24px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid var(--ink);
-      }
-      .receipt-logo {
-        width: 48px;
-        height: 48px;
-        background: var(--brand-icon) center / contain no-repeat;
-        border-radius: 6px;
-        flex: 0 0 auto;
-      }
-      .receipt-brand h2 {
-        margin: 0 0 4px;
-        font-size: 20px;
-        font-weight: 500;
-      }
-      .receipt-brand p { margin: 0 0 2px; color: var(--body); }
-      .receipt-title {
-        margin: 0 0 16px;
-        font-size: 22px;
-        font-weight: 500;
-        letter-spacing: 0.02em;
-      }
-      .receipt h3 {
-        margin: 24px 0 10px;
-        font-size: 14px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: var(--ink);
-      }
-      .receipt-meta, .receipt-dl {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      .receipt-meta td, .receipt-dl td {
-        padding: 6px 0;
-        vertical-align: top;
-      }
-      .receipt-meta td:first-child, .receipt-dl td:first-child {
-        width: 180px;
-        color: var(--muted);
-      }
-      .receipt-lines {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 8px 0 12px;
-      }
-      .receipt-lines th, .receipt-lines td {
-        text-align: left;
-        padding: 10px 8px;
-        border-bottom: 1px solid var(--hairline);
-      }
-      .receipt-lines th { font-weight: 500; color: var(--muted); font-size: 13px; }
-      .receipt-lines td:nth-child(3),
-      .receipt-lines th:nth-child(3),
-      .receipt-lines td:nth-child(4),
-      .receipt-lines th:nth-child(4),
-      .receipt-lines td:nth-child(5),
-      .receipt-lines th:nth-child(5) { text-align: right; }
-      .receipt-totals { width: 280px; margin-left: auto; border-collapse: collapse; }
-      .receipt-totals td:first-child,
-      .receipt-total-paid span {
-        color: var(--muted);
-      }
-      .receipt-totals td { padding: 8px 0; }
-      .receipt-totals td:last-child { text-align: right; }
-      .receipt-totals tr:last-child td {
-        font-weight: 500;
-        border-top: 1px solid var(--ink);
-        padding-top: 12px;
-      }
-      .receipt-paid {
-        display: inline-block;
-        font-weight: 500;
-        color: var(--success);
-      }
-      .receipt-note {
-        margin: 24px 0 8px;
-        color: var(--body);
-      }
-      .receipt-sign { margin: 4px 0 0; color: var(--muted); }
-      .receipt-check {
-        display: grid;
-        grid-template-columns: 1fr 200px;
-        gap: 28px;
-        align-items: start;
-        margin-top: 8px;
-      }
-      .receipt-total-paid {
+      .lc-head {
         display: flex;
         justify-content: space-between;
-        align-items: baseline;
-        gap: 12px;
-        margin: 0 0 12px;
-        font-size: 14px;
+        align-items: flex-start;
+        gap: 24px;
+        margin-bottom: 28px;
       }
-      .receipt-total-paid strong { font-weight: 500; }
-      .receipt-qr {
-        background: #f5e27a;
-        padding: 14px 12px 16px;
-        text-align: center;
-      }
-      .receipt-qr-name {
+      .lc-issuer p {
         margin: 0;
         font-size: 12px;
-        font-weight: 500;
-        color: var(--ink);
+        line-height: 1.45;
+        color: #111;
       }
-      .receipt-qr img {
-        display: block;
-        width: 132px;
-        height: 132px;
-        margin: 10px auto 0;
-        background: #fff;
-        padding: 4px;
+      .lc-brand-name {
+        color: #2aa3c7 !important;
+        font-weight: 700;
+        font-size: 15px !important;
+        margin-top: 4px !important;
       }
-      .receipt-qr-caption {
-        margin: 10px 0 0;
-        font-size: 13px;
-        font-weight: 500;
+      .lc-logo { display: block; }
+      .lc-meta-wrap { min-width: 260px; text-align: right; }
+      .lc-title {
+        margin: 0 0 10px;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: #111;
       }
+      .lc-meta {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      .lc-meta th, .lc-meta td {
+        border: 1px solid #7ec9d8;
+        padding: 6px 10px;
+        text-align: left;
+      }
+      .lc-meta th {
+        background: #7ec9d8;
+        color: #fff;
+        font-weight: 700;
+        width: 46%;
+      }
+      .lc-to { margin: 0 0 18px; font-size: 13px; color: #111; }
+      .lc-lines {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      .lc-lines th, .lc-lines td {
+        border: 1px solid #111;
+        padding: 8px 10px;
+        vertical-align: top;
+      }
+      .lc-lines th {
+        background: #f3f3f3;
+        font-weight: 700;
+        text-align: center;
+        color: #111;
+      }
+      .lc-lines td { text-align: center; color: #111; }
+      .lc-lines .lc-desc {
+        text-align: left;
+        min-height: 220px;
+        height: 220px;
+      }
+      .lc-lines .lc-no { width: 48px; }
+      .lc-totals {
+        width: 280px;
+        margin: 0 0 0 auto;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      .lc-totals th, .lc-totals td {
+        border: 1px solid #111;
+        padding: 7px 10px;
+        color: #111;
+      }
+      .lc-totals th { text-align: right; font-weight: 700; width: 55%; }
+      .lc-totals td { text-align: right; }
+      .lc-foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-top: 28px;
+        gap: 24px;
+      }
+      .lc-pay p { margin: 0 0 6px; font-size: 13px; color: #111; }
+      .lc-pay table { border-collapse: collapse; font-size: 12px; }
+      .lc-pay td { padding: 2px 16px 2px 0; color: #111; }
+      .lc-qr { margin-top: 16px; text-align: left; }
+      .lc-qr img { display: block; width: 128px; height: 128px; }
+      .lc-qr-placeholder {
+        width: 128px;
+        height: 128px;
+        background: #f3f3f3;
+      }
+      .lc-qr p { margin: 8px 0 0; font-size: 12px; font-weight: 700; color: #111; }
+      .lc-auth { text-align: center; min-width: 180px; }
+      .lc-auth-label { margin: 0 0 8px; font-size: 13px; color: #111; }
+      .lc-stamp {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        margin: 0 auto;
+        overflow: hidden;
+        border-radius: 50%;
+      }
+      .lc-sign {
+        position: absolute;
+        left: 18px;
+        top: 58px;
+        font-family: Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        color: #1a1a1a;
+        transform: rotate(-8deg);
+        pointer-events: none;
+      }
+      .lc-role { margin: 4px 0 0; font-size: 13px; color: #111; }
       @media (max-width: 767px) {
-        .receipt-check { grid-template-columns: 1fr; }
-        .receipt-qr { max-width: 200px; }
+        .lc-head, .lc-foot { flex-direction: column; }
+        .lc-meta-wrap { width: 100%; }
       }
       .pricing-h1 {
         font-size: 44.8px;
@@ -1983,6 +2046,9 @@
         border-radius: 16px;
         padding: 40px 28px;
       }
+      .payment-success { max-width: 800px; margin: 0 auto; }
+      .payment-success-head { max-width: 640px; margin: 0 auto 32px; text-align: center; }
+      .payment-success-actions { max-width: 760px; margin: 24px auto 0; justify-content: space-between; }
       .success-mark {
         width: 64px;
         height: 64px;
@@ -2197,6 +2263,14 @@
   height: 64px;
 }
 .login-page main { flex: 1; padding: 96px 24px; display: flex; justify-content: center; align-items: center; }
+.signup-form { width: min(960px, 100%); }
+.signup-form .signup-progress {
+  width: 100%;
+  max-width: none;
+  margin: 0 0 32px;
+}
+.login-page:has(.signup-form) main { align-items: flex-start; }
+.signup-form .note { margin: 24px 0 0; text-align: center; }
 .login-page .card {
   width: min(400px, 100%);
   display: flex;
