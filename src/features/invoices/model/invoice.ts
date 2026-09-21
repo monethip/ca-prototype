@@ -35,13 +35,6 @@ function fmtRange(iso?: string) {
   return months[d.getMonth()] + " " + dd + "," + d.getFullYear();
 }
 
-const LOGO_SVG =
-  "<svg class='lc-logo' viewBox='0 0 72 56' width='72' height='56' aria-hidden='true'>" +
-  "<path fill='#3db4d0' d='M36 6c12 0 22 8 26 18-4-2-9-3-14-3-10 0-18 5-22 13C24 20 29 6 36 6z'/>" +
-  "<path fill='#1e8fb0' d='M18 20c8-8 20-10 30-6-8 2-14 8-16 16-4-5-9-8-14-10z'/>" +
-  "<path fill='#7fd4e6' d='M44 18c8 2 14 8 16 16-6-4-14-6-22-4 2-5 4-9 6-12z'/>" +
-  "</svg>";
-
 export function invoiceFromHistory(r: PaymentHistoryRow, certs: Certificate[], email: string): Invoice {
   const total = Number(r.total);
   const price = r.price != null ? Number(r.price) : total / 1.1;
